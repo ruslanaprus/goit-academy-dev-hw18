@@ -56,7 +56,7 @@ public class AuthMvcController {
                 return "redirect:/login?error=InvalidCredentials";
             }
 
-            userService.resetFailedAttempts(user.getId());
+            userService.resetFailedAttempts(user);
             authenticateUser(user, request);
             log.info("User {} authenticated successfully", username);
 

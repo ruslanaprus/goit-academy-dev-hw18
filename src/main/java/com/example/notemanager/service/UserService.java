@@ -3,6 +3,7 @@ package com.example.notemanager.service;
 import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.User;
+import com.example.notemanager.security.UserContext;
 import com.example.notemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -23,17 +24,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserContext userContext;
 
     public UserService(UserRepository userRepository,
-                       @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
+                       @Qualifier("passEncoder") PasswordEncoder passwordEncoder, UserContext userContext) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userContext = userContext;
     }
 
     public User getAuthenticatedUser() {
+        if (userContext.getCachedUser() != null) {
+            return userContext.getCachedUser();
+        }
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUserName(username)
-                .orElseThrow(() -> new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage()));
+        User user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage()));
+        userContext.setCachedUser(user);
+        return user;
     }
 
     public String createUser(String username, String password) {
@@ -71,7 +79,9 @@ public class UserService {
     }
 
     @Transactional
-    public void resetFailedAttempts(Long userId) {
-        userRepository.resetFailedAttempts(userId);
+    public void resetFailedAttempts(User user) {
+        if (user.getFailedAttempts() > 0 || user.getAccountLockedUntil() != null) {
+            userRepository.resetFailedAttempts(user.getId());
+        }
     }
 }
