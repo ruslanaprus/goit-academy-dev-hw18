@@ -11,12 +11,10 @@ import com.example.notemanager.api.util.JwtUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,18 +28,15 @@ public class AuthApiController {
 
     private final UserService userService;
     private final DaoAuthenticationProvider authenticationManager;
-    private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final SignupResultMapper signupResultMapper;
 
     public AuthApiController(UserService userService,
                              DaoAuthenticationProvider authenticationManager,
-                             @Qualifier("userDetails") UserDetailsService userDetailsService,
                              JwtUtil jwtUtil,
                              SignupResultMapper signupResultMapper) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
-        this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
         this.signupResultMapper = signupResultMapper;
     }
