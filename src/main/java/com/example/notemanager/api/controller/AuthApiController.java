@@ -9,6 +9,11 @@ import com.example.notemanager.model.User;
 import com.example.notemanager.service.UserService;
 import com.example.notemanager.api.util.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import org.slf4j.Logger;
@@ -48,6 +53,21 @@ public class AuthApiController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Operation(summary = "Sign up", description = "Add a new user",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User registration details",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = UserCreateRequest.class))
+            ))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = SignupResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content)
+    })
     @PostMapping("/signup")
     public SignupResponse signup(@RequestBody UserCreateRequest request) {
         try {
@@ -58,6 +78,24 @@ public class AuthApiController {
         }
     }
 
+    @Operation(summary = "Login", description = "Authenticate a user and return a token",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User login credentials",
+                    required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserLoginRequest.class))
+            ))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login successful - returns authentication token",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorised - Invalid credentials",
+                    content = @Content),
+            @ApiResponse(responseCode = "423", description = "Account locked",
+                    content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content)
+    })
     @PostMapping("/login")
     public LoginResponse login(@RequestBody UserLoginRequest request) {
         String username = request.userName();
