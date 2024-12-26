@@ -5,7 +5,10 @@ import com.example.notemanager.api.model.dto.NoteMapper;
 import com.example.notemanager.api.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -39,15 +42,15 @@ public class NoteApiController {
 
     @Operation(summary = "Display the list of notes",
             description = """
-                Retrieve a paginated list of all notes belonging to the authenticated user.
-                
-                **Pagination Parameters:**
-                - `page` (optional, default: `0`): The page number (zero-based index) to retrieve.
-                - `size` (optional, default: `10`): The number of notes per page.
-                
-                **Example Request:**
-                `GET http://localhost:8080/api/v1/notes?page=0&size=10`
-                """,
+                    Retrieve a paginated list of all notes belonging to the authenticated user.
+                    
+                    **Pagination Parameters:**
+                    - `page` (optional, default: `0`): The page number (zero-based index) to retrieve.
+                    - `size` (optional, default: `10`): The number of notes per page.
+                    
+                    **Example Request:**
+                    `GET http://localhost:8080/api/v1/notes?page=0&size=10`
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successful operation"),
                     @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource")
@@ -61,13 +64,18 @@ public class NoteApiController {
     }
 
     @Operation(summary = "Find a note by id",
-            description = "Retrieve the details of a specific note using its unique identifier",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful operation"),
-                    @ApiResponse(responseCode = "400", description = "Invalid note ID provided"),
-                    @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
-                    @ApiResponse(responseCode = "404", description = "Note not found")
-            })
+            description = "Retrieve the details of a specific note using its unique identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = NoteResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid note ID provided",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Note not found",
+                    content = @Content)
+    })
     @GetMapping("/{id}")
     public NoteResponse getById(@PathVariable @Positive Long id) {
         Note note = noteService.getById(id);
@@ -75,13 +83,13 @@ public class NoteApiController {
     }
 
     @Operation(summary = "Delete a note by id",
-            description = "Remove a specific note using its unique identifier. The operation is irreversible",
-            responses = {
-                    @ApiResponse(responseCode = "204", description = "Note successfully deleted with no response body"),
-                    @ApiResponse(responseCode = "400", description = "Invalid note ID provided"),
-                    @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
-                    @ApiResponse(responseCode = "404", description = "Note not found")
-            })
+            description = "Remove a specific note using its unique identifier. The operation is irreversible")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Note successfully deleted with no response body"),
+            @ApiResponse(responseCode = "400", description = "Invalid note ID provided"),
+            @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
+            @ApiResponse(responseCode = "404", description = "Note not found")
+    })
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable @Positive Long id) {
@@ -90,13 +98,18 @@ public class NoteApiController {
 
     @Operation(
             summary = "Edit a note by ID",
-            description = "Update the details of an existing note using its unique identifier",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successfully updated the note"),
-                    @ApiResponse(responseCode = "400", description = "Invalid note data or ID provided"),
-                    @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
-                    @ApiResponse(responseCode = "404", description = "Note not found"),
-            })
+            description = "Update the details of an existing note using its unique identifier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated the note",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = NoteResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid note data or ID provided",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Note not found",
+                    content = @Content)
+    })
     @PutMapping("/{id}")
     public NoteResponse edit(@PathVariable @Positive Long id,
                              @Valid @RequestBody Note note) {
@@ -107,12 +120,16 @@ public class NoteApiController {
 
     @Operation(
             summary = "Create a new note",
-            description = "Add a new note to the system for the authenticated user.",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Successfully created the note"),
-                    @ApiResponse(responseCode = "400", description = "Invalid note data provided"),
-                    @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource"),
-            })
+            description = "Add a new note to the system for the authenticated user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully created the note",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = NoteResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid note data provided",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
+                    content = @Content)
+    })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public NoteResponse create(@Valid @RequestBody Note note) {
@@ -123,18 +140,18 @@ public class NoteApiController {
     @Operation(
             summary = "Search for a note by a keyword",
             description = """
-                Search for notes containing the specified keyword in their title or content.
-                
-                **Request Parameters:**
-                - `keyword` (required): The search term to look for in the notes. This parameter cannot be empty.
-                - `page` (optional, default: `0`): The page number (zero-based index) to retrieve for the search results.
-                - `size` (optional, default: `10`): The number of notes per page in the search results.
-                
-                **Example Request:**
-                `GET http://localhost:8080/api/v1/notes/search?keyword=cute&page=0&size=10`
-                
-                This will search for notes containing the word "cute" and return the first page of results with up to 10 notes per page.
-                """,
+                    Search for notes containing the specified keyword in their title or content.
+                    
+                    **Request Parameters:**
+                    - `keyword` (required): The search term to look for in the notes. This parameter cannot be empty.
+                    - `page` (optional, default: `0`): The page number (zero-based index) to retrieve for the search results.
+                    - `size` (optional, default: `10`): The number of notes per page in the search results.
+                    
+                    **Example Request:**
+                    `GET http://localhost:8080/api/v1/notes/search?keyword=cute&page=0&size=10`
+                    
+                    This will search for notes containing the word "cute" and return the first page of results with up to 10 notes per page.
+                    """,
             responses = {
                     @ApiResponse(responseCode = "200", description = "Successfully retrieved the search results"),
                     @ApiResponse(responseCode = "400", description = "Invalid search query provided"),
