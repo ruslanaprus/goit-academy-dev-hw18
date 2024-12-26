@@ -25,7 +25,6 @@ public class MvcSecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers("/signup", "/login", "/login.html").permitAll()
-                                .requestMatchers("swagger-ui.html", "/swagger-resources/**", "/api-docs/**", "swagger-ui/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
