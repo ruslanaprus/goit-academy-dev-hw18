@@ -4,6 +4,8 @@ import com.example.notemanager.model.Note;
 import com.example.notemanager.api.model.dto.NoteMapper;
 import com.example.notemanager.api.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/notes")
 @RequiredArgsConstructor
+@Tags(value = {
+        @Tag(name = "Note controller", description = "Provides operations for managing notes")
+}
+)
 public class NoteApiController {
 
     private final NoteService noteService;
