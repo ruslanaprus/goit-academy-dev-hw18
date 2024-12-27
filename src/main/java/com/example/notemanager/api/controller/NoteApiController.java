@@ -1,11 +1,14 @@
 package com.example.notemanager.api.controller;
 
+import com.example.notemanager.api.model.dto.Mapper;
+import com.example.notemanager.api.model.dto.request.NoteCreateRequest;
+import com.example.notemanager.api.model.dto.request.NoteUpdateRequest;
 import com.example.notemanager.model.Note;
-import com.example.notemanager.api.model.dto.NoteMapper;
 import com.example.notemanager.api.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -38,7 +41,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteApiController {
 
     private final NoteService noteService;
-    private final NoteMapper noteMapper;
+    private final Mapper<NoteCreateRequest, Note> noteCreateRequestMapper;
+    private final Mapper<NoteUpdateRequest, Note> noteUpdateRequestMapper;
+    private final Mapper <Note, NoteResponse> noteMapper;
 
     @Operation(summary = "Display the list of notes",
             description = """
@@ -60,7 +65,7 @@ public class NoteApiController {
                                       @RequestParam(defaultValue = "10") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return noteService.listAll(pageRequest)
-                .map(noteMapper::toResponse);
+                .map(noteMapper::map);
     }
 
     @Operation(summary = "Find a note by id",
@@ -79,7 +84,7 @@ public class NoteApiController {
     @GetMapping("/{id}")
     public NoteResponse getById(@PathVariable @Positive Long id) {
         Note note = noteService.getById(id);
-        return noteMapper.toResponse(note);
+        return noteMapper.map(note);
     }
 
     @Operation(summary = "Delete a note by id",
@@ -115,12 +120,20 @@ public class NoteApiController {
                              @Valid @RequestBody Note note) {
         note.setId(id);
         Note updatedNote = noteService.update(note);
-        return noteMapper.toResponse(updatedNote);
+        return noteMapper.map(updatedNote);
     }
 
     @Operation(
             summary = "Create a new note",
-            description = "Add a new note to the system for the authenticated user")
+            description = "Add a new note to the system for the authenticated user",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "New note details",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = NoteCreateRequest.class),
+                            examples = @ExampleObject(value = "{ \"title\": \"My new note\", \"content\": \"Practiced my cutest meow. Human was impressed\"}"))
+            ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created the note",
                     content = {@Content(mediaType = "application/json",
@@ -132,9 +145,9 @@ public class NoteApiController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public NoteResponse create(@Valid @RequestBody Note note) {
-        Note savedNote = noteService.create(note);
-        return noteMapper.toResponse(savedNote);
+    public NoteResponse create(@Valid @RequestBody NoteCreateRequest newNote) {
+        Note savedNote = noteService.create(noteCreateRequestMapper.map(newNote));
+        return noteMapper.map(savedNote);
     }
 
     @Operation(
