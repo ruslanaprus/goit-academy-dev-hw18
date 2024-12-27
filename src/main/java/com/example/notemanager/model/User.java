@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +37,11 @@ public class User implements UserDetails {
     @SequenceGenerator(name = "user_seq", sequenceName = "seq_users_id", allocationSize = 1)
     private Long id;
     @Column(name = "username", unique = true)
+    @NotNull(message = "username must not be null")
+    @NotEmpty(message = "username must not be empty")
     private String userName;
+    @NotNull(message = "password must not be null")
+    @NotEmpty(message = "password must not be empty")
     private String password;
     private String role;
     @Column(name = "failed_attempts", nullable = false, columnDefinition = "int default 0")

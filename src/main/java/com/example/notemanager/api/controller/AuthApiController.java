@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -65,11 +66,13 @@ public class AuthApiController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = SignupResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided",
+                    content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error",
                     content = @Content)
     })
     @PostMapping("/signup")
-    public SignupResponse signup(@RequestBody UserCreateRequest request) {
+    public SignupResponse signup(@Valid @RequestBody UserCreateRequest request) {
         try {
             String message = userService.createUser(request.userName(), request.password());
             return signupResultMapper.toResponse(request.userName(), message);
@@ -89,7 +92,11 @@ public class AuthApiController {
             @ApiResponse(responseCode = "200", description = "Login successful - returns authentication token",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = LoginResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input provided",
+                    content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorised - Invalid credentials",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "User not found",
                     content = @Content),
             @ApiResponse(responseCode = "423", description = "Account locked",
                     content = @Content),
@@ -97,7 +104,7 @@ public class AuthApiController {
                     content = @Content)
     })
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody UserLoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody UserLoginRequest request) {
         String username = request.userName();
         String password = request.password();
 
