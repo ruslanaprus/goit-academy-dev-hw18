@@ -45,4 +45,9 @@ public class Note {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public Note withId(Long id) {
+        this.id = id;
+        return this;
+    }
 }

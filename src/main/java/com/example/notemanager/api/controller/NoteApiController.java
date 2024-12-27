@@ -73,7 +73,9 @@ public class NoteApiController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = NoteResponse.class))}),
+                            schema = @Schema(implementation = NoteResponse.class),
+                            examples = @ExampleObject(value = "{ \"title\": \"Snack Break\", \"content\": \"Stole a bite of tuna from the counter when nobody was looking. Delicious!\"}"))
+            }),
             @ApiResponse(responseCode = "400", description = "Invalid note ID provided",
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
@@ -103,11 +105,21 @@ public class NoteApiController {
 
     @Operation(
             summary = "Edit a note by ID",
-            description = "Update the details of an existing note using its unique identifier")
+            description = "Update the details of an existing note using its unique identifier",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "New note details",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = NoteCreateRequest.class),
+                            examples = @ExampleObject(value = "{ \"title\": \"My scratched note\", \"content\": \"I had to rethink my plan, so my scratched note is full of changes.\"}"))
+            ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated the note",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = NoteResponse.class))}),
+                            schema = @Schema(implementation = NoteResponse.class),
+                            examples = @ExampleObject(value = "{ \"title\": \"My scratched note\", \"content\": \"I had to rethink my plan, so my scratched note is full of changes.\"}"))
+                    }),
             @ApiResponse(responseCode = "400", description = "Invalid note data or ID provided",
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
@@ -117,10 +129,12 @@ public class NoteApiController {
     })
     @PutMapping("/{id}")
     public NoteResponse edit(@PathVariable @Positive Long id,
-                             @Valid @RequestBody Note note) {
-        note.setId(id);
-        Note updatedNote = noteService.update(note);
-        return noteMapper.map(updatedNote);
+                             @Valid @RequestBody NoteUpdateRequest noteUpdateRequest) {
+        return noteMapper.map(
+                noteService.update(
+                        noteUpdateRequestMapper.map(noteUpdateRequest).withId(id)
+                )
+        );
     }
 
     @Operation(
@@ -132,12 +146,14 @@ public class NoteApiController {
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = NoteCreateRequest.class),
-                            examples = @ExampleObject(value = "{ \"title\": \"My new note\", \"content\": \"Practiced my cutest meow. Human was impressed\"}"))
+                            examples = @ExampleObject(value = "{ \"title\": \"Cuddles\", \"content\": \"Snuggled up with the human on the sofa. Purring level: maximum.\"}"))
             ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created the note",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = NoteResponse.class))}),
+                            schema = @Schema(implementation = NoteResponse.class),
+                            examples = @ExampleObject(value = "{ \"title\": \"Cuddles\", \"content\": \"Snuggled up with the human on the sofa. Purring level: maximum.\"}"))
+            }),
             @ApiResponse(responseCode = "400", description = "Invalid note data provided",
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "User does not have permission to access this resource",
