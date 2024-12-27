@@ -29,8 +29,8 @@ public class SwaggerConfig {
                                         .bearerFormat("JWT")
                                         .scheme("bearer")))
                 .info(new Info()
-                        .title("Note Management Service")
-                        .description("Keep your thoughts safe in one place")
+                        .title("Pawprints On Pages: The Cat Notes Service")
+                        .description("A safe and thoughtful space to capture, update, and manage the special moments and adventures in your cat's life.")
                         .version("1.0")
                 );
 

@@ -11,6 +11,7 @@ import com.example.notemanager.api.util.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -60,12 +61,15 @@ public class AuthApiController {
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = UserCreateRequest.class))
+                            schema = @Schema(implementation = UserCreateRequest.class),
+                    examples = @ExampleObject(value = "{ \"userName\": \"Whiskers\", \"password\": \"youshallnotpass\"}"))
             ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = SignupResponse.class))),
+                            schema = @Schema(implementation = SignupResponse.class),
+                            examples = @ExampleObject(value = "{ \"userName\": \"Whiskers\", \"message\": \"User created\"}"))
+            ),
             @ApiResponse(responseCode = "400", description = "Invalid input provided",
                     content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error",
@@ -86,12 +90,15 @@ public class AuthApiController {
                     description = "User login credentials",
                     required = true,
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserLoginRequest.class))
+                            schema = @Schema(implementation = UserLoginRequest.class),
+                            examples = @ExampleObject(value = "{ \"userName\": \"Whiskers\", \"password\": \"youshallnotpass\"}"))
             ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login successful - returns authentication token",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = LoginResponse.class))),
+                            schema = @Schema(implementation = LoginResponse.class),
+                            examples = @ExampleObject(value = "{ \"token\": \"meowstsecureandverylongandundecipherabletoken\"}"))
+            ),
             @ApiResponse(responseCode = "400", description = "Invalid input provided",
                     content = @Content),
             @ApiResponse(responseCode = "401", description = "Unauthorised - Invalid credentials",
