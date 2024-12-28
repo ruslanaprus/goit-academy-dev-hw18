@@ -68,7 +68,7 @@ public class NoteApiController {
                 .map(noteMapper::map);
     }
 
-    @Operation(summary = "Find a note by id",
+    @Operation(summary = "Find a note by ID",
             description = "Retrieve the details of a specific note using its unique identifier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -89,7 +89,7 @@ public class NoteApiController {
         return noteMapper.map(note);
     }
 
-    @Operation(summary = "Delete a note by id",
+    @Operation(summary = "Delete a note by ID",
             description = "Remove a specific note using its unique identifier. The operation is irreversible")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Note successfully deleted with no response body"),
