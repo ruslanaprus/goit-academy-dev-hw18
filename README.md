@@ -1,7 +1,7 @@
-# Note Manager
+# Note Manager with REST API
 
-A Java Spring application enhanced with a RESTful API and designed to help with **notes management**. This project provides a secure and user-friendly functionalities for creating, reading, updating, and deleting notes.
-The purpose of this application is to provide a backend service for managing notes, which handles user authentication, session management, account lockout mechanisms, and input validation.
+A Java Spring application that provides a REST API and website for **notes management**. This project provides a secure and user-friendly application for creating, reading, updating, and deleting notes.
+The purpose of this application is to provide an interface for managing notes, which handles user authentication, session management, account lockout mechanisms, and input validation.
 The application has two independent parts:
  - **MVC Module**: Handles traditional web-based interactions.  
  - **REST API Module**: Offers standardised endpoints for integration with external systems.
@@ -9,7 +9,9 @@ The application has two independent parts:
 Both modules share a centralised architecture for core functionalities, including JPA repositories, services, database entities, and caching, ensuring consistency and reusability.
 The addition of the REST API makes the system more flexible and keeps the MVC and API components separate, allowing them to operate independently.
 
-[Getting started](#getting-started)
+This project is an updated version of the [Note Manager](https://github.com/ruslanaprus/goit-academy-dev-hw17). A description of the MVC module is available [here](https://github.com/ruslanaprus/goit-academy-dev-hw17). 
+
+[Getting started with the Note Manager API](#getting-started)
 
 ---
 
@@ -29,13 +31,13 @@ The addition of the REST API makes the system more flexible and keeps the MVC an
 
 ---
 
-## Main Features
+## Main Features of REST API
 
 ### 1. **[RESTful Endpoints](#existing-endpoints)**:
-  - Standardized CRUD operations (`GET`, `POST`, `PUT`, `DELETE`) for managing notes.
+  - Standardised CRUD operations (`GET`, `POST`, `PUT`, `DELETE`) for managing notes.
   - Query-based searching to locate notes by a keyword.
 
-### 2. Database Configuration
+### 2. Database Operations
 - **Database-Backed Note Management**: Notes are stored in a database managed by Flyway migrations.
 - **Optimisation**: Custom queries in repositories reduce database calls and enhance performance.
   - Example: `findByUserAndKeyword` combines user filtering and keyword matching in one query.
@@ -82,6 +84,7 @@ The addition of the REST API makes the system more flexible and keeps the MVC an
 
 - **Java 21**: Ensure Java 21 is installed on your system.
 - **Gradle**: This project uses Gradle for dependency management and build tasks.
+- **PostgreSQL**: Is used for storing note data.
 
 ### Installation
 
