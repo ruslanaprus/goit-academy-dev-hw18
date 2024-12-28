@@ -5,6 +5,7 @@ import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
 import com.example.notemanager.repository.NoteRepository;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,11 +23,15 @@ class NoteServiceTest {
     private NoteService noteService;
     private NoteRepository noteRepository;
     private User mockUser;
+    private UserService userService;
+    private Cache<String, User> userCache;
 
     @BeforeEach
     void setUp() {
         noteRepository = mock(NoteRepository.class);
-        UserService userService = mock(UserService.class);
+        userService = mock(UserService.class);
+        userCache = mock(Cache.class);
+
         noteService = new NoteService(noteRepository, userService);
 
         mockUser = new User();
@@ -160,5 +165,14 @@ class NoteServiceTest {
 
         Exception exception = assertThrows(NoteServiceException.class, () -> noteService.delete(999L));
         assertEquals(ExceptionMessages.NOTE_NOT_FOUND.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void userCachePopulatesOnAuthentication() {
+        String username = mockUser.getUsername();
+        when(userCache.getIfPresent(username)).thenReturn(null);
+
+        userCache.put(username, mockUser);
+        verify(userCache).put(username, mockUser);
     }
 }

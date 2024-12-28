@@ -6,6 +6,7 @@ import com.example.notemanager.model.User;
 import com.example.notemanager.mvc.controller.NoteMvcController;
 import com.example.notemanager.service.NoteService;
 import com.example.notemanager.service.UserService;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -38,14 +40,19 @@ class NoteControllerTest {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private Cache<String, User> userCache;
+
     @BeforeEach
     void setUp() {
-        Mockito.reset(noteService);
+        Mockito.reset(noteService, userService);
 
         User mockUser = new User();
         mockUser.setId(1L);
         mockUser.setUserName("mockUser");
+
         when(userService.getAuthenticatedUser()).thenReturn(mockUser);
+        when(userService.findByUserName("mockUser")).thenReturn(Optional.of(mockUser));
     }
 
     @Test
@@ -121,6 +128,8 @@ class NoteControllerTest {
                 .andExpect(view().name("note/error"))
                 .andExpect(model().attributeExists("message"))
                 .andExpect(model().attribute("message", ExceptionMessages.INVALID_NOTE_DATA.getMessage()));
+
+        verify(noteService, never()).update(any(Note.class));
     }
 
     @Test
