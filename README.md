@@ -1,8 +1,15 @@
 # Note Manager
 
-A Java Spring MVC application designed to help with **notes management**. This project provides a secure and user-friendly functionalities for creating, reading, updating, and deleting notes.
+A Java Spring application enhanced with a RESTful API and designed to help with **notes management**. This project provides a secure and user-friendly functionalities for creating, reading, updating, and deleting notes.
 The purpose of this application is to provide a backend service for managing notes, which handles user authentication, session management, account lockout mechanisms, and input validation.
-This project is an enhanced version of the [Note Manager](https://github.com/ruslanaprus/goit-academy-dev-hw16), and it has an improved architecture for better maintainability and scalability.
+The application has two independent parts:
+ - **MVC Module**: Handles traditional web-based interactions.  
+ - **REST API Module**: Offers standardised endpoints for integration with external systems.
+
+Both modules share a centralised architecture for core functionalities, including JPA repositories, services, database entities, and caching, ensuring consistency and reusability.
+The addition of the REST API makes the system more flexible and keeps the MVC and API components separate, allowing them to operate independently.
+
+[Getting started](#getting-started)
 
 ---
 
@@ -17,26 +24,39 @@ This project is an enhanced version of the [Note Manager](https://github.com/rus
 - **Jakarta Bean Validation**: Ensures data integrity with annotations `@NotNull` and `@NotEmpty`.
 - **Lombok**: Reduces boilerplate code with annotations like `@Builder`, `@Getter`, and `@RequiredArgsConstructor`.
 - **JUnit 5 & Mockito**: Provides a robust framework for writing unit and integration tests.
-- **Thymeleaf**: Template engine for rendering dynamic HTML pages with embedded backend data.
+- **JWT (JSON Web Tokens)**: Secures authentication and session management with stateless, token-based mechanisms.
+- **Springdoc OpenAPI**: Generates API documentation automatically and integrates with Swagger UI.
 
 ---
 
 ## Main Features
 
-### 1. Database Configuration
-**Database-Backed Note Management**: Notes are stored in a database managed by Flyway migrations.
+### 1. **[RESTful Endpoints](#existing-endpoints)**:
+  - Standardized CRUD operations (`GET`, `POST`, `PUT`, `DELETE`) for managing notes.
+  - Query-based searching to locate notes by a keyword.
+
+### 2. Database Configuration
+- **Database-Backed Note Management**: Notes are stored in a database managed by Flyway migrations.
+- **Optimisation**: Custom queries in repositories reduce database calls and enhance performance.
+  - Example: `findByUserAndKeyword` combines user filtering and keyword matching in one query.
 
 ### 2. Security
-**User Authentication and Authorization**:
-- Login and logout functionalities.
 - **Separation of Notes Between Users**: Each user's notes are isolated and private.
-- **User Registration**: New users can sign up via a registration page.
-- **Session Management**:
-  - Users can log out, and their session will be invalidated.
-  - Only one active session per user is allowed.
-- **Account Lockout Mechanism**:
-  - Tracks failed login attempts and locks account after 3 unsuccessful login attempts.
-  - Unlocks accounts automatically after the lockout duration expires.
+- **User Registration**: New users can sign up via `/api/v1/signup`
+- Endpoints `/api/v1/signup` and `/api/v1/login` are publicly accessible, while all other endpoints require authentication.
+- **Session Management**: Stateless architecture is implemented with JWT authentication for secure token-based sessions.
+- **Token Generation**:
+  - JWT tokens are generated and validated using `JwtUtil` with a secret key and expiration configuration.
+  - Tokens include username claims and are signed using HMAC-SHA.
+- **Access Control**:
+  - Role-based access control (currently, all users default to the `ROLE_USER` role).
+  - JWT validation and user caching to ensure secure and efficient access to authenticated resources.
+- **Account/Password Management**:
+  - Passwords are hashed using a secure `PasswordEncoder` implementation.
+  - Failed login attempts are tracked, with accounts locked temporarily after 3 unsuccessful login attempts.
+- **Input Validation**:
+  - Strict validation using annotations like `@NotNull`, `@NotEmpty`, and `@Positive`.
+  - Custom exception handling to provide meaningful feedback and HTTP status codes on invalid inputs.
 
 ### 3. Business Logic
 - **CRUD Operations**:
@@ -46,27 +66,13 @@ This project is an enhanced version of the [Note Manager](https://github.com/rus
   - **Update Note**: Modify an existing note.
   - **Delete Note**: Remove a note by ID.
 - **Search Notes**: Allows users to search for notes containing a specific keyword. This feature scans note titles and content for matches.
-- **User Input Validation**: Validates note data such as title and content using Jakarta Bean Validation.
+- **User Input Validation**:
+  - Validates note data such as title and content using Jakarta Bean Validation.
+  - Additional checks for logical consistency (e.g., non-duplicate usernames) are performed within the service layer.
+- **Caching**: Data frequently reused within a request (e.g., fetched user details) is temporarily cached.
 
 ### 4. Error Handling
 - **Global Exception Handling**: Provides error messages via a global exception handler.
-
-### 5. Web Layer
-- **Endpoints**: 
-  - Manages HTTP requests for the note management functionality.
-  - Supports endpoints for listing, creating, updating, and deleting notes.
-- **Pagination**: Allows efficient display of notes, in case of large datasets.
-
-### 6. View Layer
-- **Thymeleaf integration**:
-  - **Sign Up Page**: Allows new users to register.
-  - **Login Page**: Provides user authentication.
-  - **List All Notes**: Displays all notes.
-  - **Create a Note**: Form to create a new note.
-  - **Edit Note**: Form to update a note.
-  - **Error page**: Displays user-friendly error messages for invalid inputs or missing resources.
-  - **Dynamic and Reusable Code with Thymeleaf**: Thymeleaf fragments are used for repeatable elements like headers and navigation menus.
-  - **User's Name Display on Navbar**: The logged-in user's name is displayed on the navigation bar.
 
 ---
 
@@ -84,8 +90,14 @@ This project is an enhanced version of the [Note Manager](https://github.com/rus
 git clone git@github.com:ruslanaprus/goit-academy-dev-hw18.git
 cd goit-academy-dev-hw18
 ```
-2. Database Configuration: Copy the `.env.example` file into `.env`, and populate it with your DB details (keys: [GOIT_DB2_URL, GOIT_DB_USER, GOIT_DB_PASS]). This file will be used to set DB properties for Flyway plugin in `build.gradle` and for your application.
-
+2. Database Configuration and JWT Secret Setup:
+ -  Copy the `.env.example` file into `.env`:
+```shell
+cp .env.example .env
+```
+ - Populate the `.env` file with the required details:
+   - **Your DB details**: Set values: [`GOIT_DB2_URL, GOIT_DB_USER, GOIT_DB_PASS`] for DB connection for the Flyway plugin in `build.gradle` and for your application.
+   - **JWT Secret**: Add a secure value to the `SECRET` key. This will be used for generating and validating JWT tokens.
 
 3. Run Flyway Migration: To apply database migrations, run:
 ```shell
@@ -99,24 +111,28 @@ gradle flywayMigrate
 ```shell
 ./gradlew bootRun
 ```
-6. Visit the website at http://localhost:8080/signup or http://localhost:8080/login
+6. Visit the website at http://localhost:8080/swagger-ui/index.html to check OpenAPI documentation for exploring and testing API endpoints.
 
----
+## Existing Endpoints
+### Authentication Endpoints
+- `POST /api/v1/signup`: Create a new user account.
+- `POST /api/v1/login`: Authenticate a user and generate a JWT.
 
-## Project Structure
-
-- **`com.example.notemanager`**: Main entry point for the application.
-- **`model`**: Defines the `Note` and `User` classes, the core entities of the application.
-- **`repository`**: Defines repository operations, allows easy integration with various data sources.
-- **`service`**: Contains `NoteService` for managing CRUD operations and `UserService` for managing account.
-- **`controller`**: Handles web requests for note operations.
-- **`config`**: Configures access control, implements session management, and customises login and logout behaviour.
-- **`exception`**: Includes custom exceptions, the `ExceptionMessages` enum, and a global exception handler.
+### Notes Endpoints
+- `GET /api/v1/notes`: List all notes (paginated).
+- `GET /api/v1/notes/{id}`: Retrieve a specific note by ID.
+- `POST /api/v1/notes`: Create a new note.
+- `PUT /api/v1/notes/{id}`: Update an existing note.
+- `DELETE /api/v1/notes/{id}`: Delete a note by ID.
+- `GET /api/v1/notes/search?keyword={keyword}`: Search notes by keyword.
 
 ---
 
 ## Future Enhancements
 
-- **REST API**: Add controllers to expose note management functionalities via HTTP. Expand endpoints to support pagination, search, and filtering.
-- **Scalability Improvements**: Optimise the application for large-scale deployment.
+- **Expand Validation Rules**: Add constraints like maximum length for note content and title.
+- **Optimise Caching**: Explore distributed caching solutions (e.g., Redis).
+- **Implement Soft Deletes**: Instead of permanently deleting notes, mark them as archived for potential recovery.
+- **Enhance Role-Based Access Control**: Introduce more roles such as `ROLE_ADMIN` to manage administrative actions.
 - **Implement Sharing Notes with other users**
+- **Performance Monitoring**: Integrate tools like Prometheus for tracking API performance and identifying bottlenecks.
